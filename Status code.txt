@@ -1,0 +1,22 @@
+Status code
+const STATUS_CODES = {
+    // ✅ Success Responses (2xx)
+    OK: 200,                   // Successful GET request
+    CREATED: 201,              // Resource successfully created (POST)
+    ACCEPTED: 202,             // Request accepted but still processing (useful for async tasks)
+    NO_CONTENT: 204,           // Successful but no response body (DELETE)
+
+    // ❌ Client Error Responses (4xx)
+    BAD_REQUEST: 400,          // Invalid request (e.g., missing data)
+    UNAUTHORIZED: 401,         // Authentication required (JWT missing/invalid)
+    FORBIDDEN: 403,            // Authenticated but lacks permission
+    NOT_FOUND: 404,            // Resource not found (e.g., invalid room ID)
+    CONFLICT: 409,             // Conflict with existing data (e.g., duplicate room)
+    UNPROCESSABLE_ENTITY: 422, // Validation error (e.g., invalid email format)
+
+    // ⚠️ Server Error Responses (5xx)
+    INTERNAL_SERVER_ERROR: 500, // General server error
+    BAD_GATEWAY: 502,           // Server received an invalid response from an upstream service
+    SERVICE_UNAVAILABLE: 503,   // Server is temporarily overloaded or under maintenance
+    GATEWAY_TIMEOUT: 504        // Server timeout (e.g., slow database response)
+};
