@@ -1,9 +1,7 @@
 const app = require('./src/app');
 const connectDB = require('./src/config/db');
 const { PORT } = require('./src/config/env');
-const analyzeImage = require('./src/services/sightEngineImageAnalyzer.services');
-
-analyzeImage();
+//const analyzeImage = require('./src/services/sightEngineImageAnalyzer.services');
 
 const authRoutes = require('./src/routes/auth.routes')
 const adminRoutes = require('./src/routes/admin.routes')
