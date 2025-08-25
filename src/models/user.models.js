@@ -37,10 +37,12 @@ const userSchema = new mongoose.Schema(
         },
         profession: {
             type: String,
-            enum: ["student", "working professional", "freelancer", "other"]
+            required: true
+
         },
         profileImage: {
-            type: String
+            type: String,
+            default: null
         },
         isVerified: {
             type: Boolean,
@@ -54,7 +56,6 @@ const userSchema = new mongoose.Schema(
             type: Date,
             default: null
         },
-
         location: {
             type: {
                 latitude: {
@@ -64,6 +65,7 @@ const userSchema = new mongoose.Schema(
                     type: Number,
                 },
             },
+            default: null
         },
         createdAt: {
             type: Date,
