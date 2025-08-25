@@ -1,5 +1,6 @@
 //importing room schema
 const Room = require("../models/room.models");
+const Review = require("../models/review.models");
 
 //importing cloudinary services
 const { uploadInCloudinary } = require("../services/cloudinary.services")
@@ -129,24 +130,75 @@ const deleteRoom = async (req, res) => {
 const roomsByLandlord = async (req, res) => {
     try {
         const landlordId = req.user._id;
-        const rooms = Room.find({ landlordId });
-        if (!rooms) {
+        const rooms = await Room.find({ landlordId });
+        if (rooms.length === 0) {
             return res.status(200).json({
                 error: "NO_ROOMS_CREATED",
                 message: "You don't have any room listed."
             });
         }
         return res.status(200).json({
-            message: "Rooms found created by you",
-            rooms: rooms
-        })
+            message: "Rooms created by you",
+            rooms
+        });
     } catch (error) {
         console.log("DEBUG: Error from roomsByLandlord: ", error);
         return res.status(500).json({
-            error: "LANDLORD'S_ROOM_ERROR",
+            error: "LANDLORDS_ROOM_ERROR",
             message: "Something went wrong while fetching rooms"
         });
     }
 }
+
+//filter based rooms returned
+
+const getFilteredRooms = async (req, res) => {
+    try {
+        const {
+            minPrice,
+            maxPrice,
+            isPremium,
+            address,
+            city,
+        } = req.query;
+
+        // Build dynamic query
+        const query = {};
+
+        if (minPrice) query.price = { ...query.price, $gte: Number(minPrice) };
+        if (maxPrice) query.price = { ...query.price, $lte: Number(maxPrice) };
+        if (isPremium) query.isPremium = isPremium === "true";
+        if (address) query.address = { $regex: address, $options: "i" }; // case-insensitive partial match
+
+        // Fetch rooms
+        const rooms = await Room.find(query).lean(); // lean() for plain JS objects
+
+        // Calculate average rating for each room
+        const roomsWithRating = await Promise.all(
+            rooms.map(async (room) => {
+                const reviews = await Review.find({ roomId: room._id });
+                const avgRating =
+                    reviews.length > 0
+                        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+                        : null;
+                return { ...room, avgRating };
+            })
+        );
+
+        return res.status(200).json({
+            message: "Filtered rooms fetched successfully",
+            rooms: roomsWithRating
+        });
+    } catch (error) {
+        console.error("DEBUG: Error in getFilteredRooms:", error);
+        return res.status(500).json({
+            error: "FETCH_ROOMS_ERROR",
+            message: "Something went wrong while fetching rooms"
+        });
+    }
+};
+
+module.exports = { getFilteredRooms };
+
 
 module.exports = { addRoom, updateRoom, deleteRoom }
