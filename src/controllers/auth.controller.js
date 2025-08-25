@@ -43,7 +43,11 @@ const registerUser = async (req, res) => {
         return res.status(201)
             .json({
                 message: "User registered successfully.",
-                user: { id: newUser._id, email: newUser.email, name: newUser.name }
+                user: {
+                    id: newUser._id,
+                    email: newUser.email,
+                    name: newUser.name
+                }
             });
 
     }
@@ -77,7 +81,24 @@ const loginUser = async (req, res) => {
 
         const token = await generateToken(user);
         return res.status(201)
-            .json({ message: "Logged in successfully.", token: token });
+            .json({
+                message: "Logged in successfully.",
+                token: token,
+                user: {
+                    _id: user._id,
+                    fullName: user.fullName,
+                    email: user.email,
+                    contactNum: user.contactNum,
+                    address: user.address,
+                    role: user.role,
+                    gender: user.gender,
+                    profession: user.profession,
+                    location: user.location,
+                    profession: user.profession,
+                    profileImage: user.profileImage,
+                    isVerified: user.isVerified
+                }
+            });
 
     } catch (error) {
         return res.status(401)
@@ -85,6 +106,7 @@ const loginUser = async (req, res) => {
     }
 }
 
+//controller for admin login
 const loginAdmin = async (req, res) => {
     try {
         const { emailOrPhone, password } = req.body;
@@ -109,7 +131,18 @@ const loginAdmin = async (req, res) => {
 
         const token = await generateToken(admin);
         return res.status(201)
-            .json({ message: "Logged in successfully.", token: token });
+            .json({
+                message: "Logged in successfully.",
+                token: token,
+                admin: {
+                    _id: admin._id,
+                    fullName: admin.fullName,
+                    email: admin.email,
+                    contactNum: admin.contactNum,
+                    address: admin.address,
+                    role: admin.role,
+                }
+            });
     }
     catch (error) {
         return res
