@@ -88,4 +88,41 @@ const verifyLoggedInUser = async (req, res, next) => {
     }
 }
 
-module.exports = { verifyAdmin, verifyLandlord, verifyLoggedInUser };
+//middleware that redirects login user from access login, register pages
+const redirectLoggedInUser = async (req, res, next) => {
+    try {
+        // extract token from Authorization header
+        const token = req.header("Authorization")?.split(" ")[1];
+
+        // if token exists, decode it to check validity
+        if (token) {
+            const decoded = jwt.verify(token, JWT_SECRET);
+
+            // validate token payload
+            const { error: validationError } = tokenPayloadSchema.validate(decoded);
+            if (validationError) {
+                return res.status(401).json({
+                    error: "INVALID_TOKEN_PAYLOAD",
+                    message: "Token payload is invalid"
+                });
+            }
+
+            // user is logged in → redirect
+            return res.status(401).json({
+                error: "TOKEN_PROVIDED",
+                message: "User already logged in"
+            });
+        }
+
+        // no token → proceed to login/register page
+        next();
+    } catch (error) {
+        return res.status(500).json({
+            error: "USER_VERIFICATION_ERROR",
+            message: "User verification error"
+        });
+    }
+}
+
+
+module.exports = { verifyAdmin, verifyLandlord, verifyLoggedInUser, redirectLoggedInUser };
