@@ -1,8 +1,13 @@
 //importing room schema
 const Room = require("../models/room.models");
 const User = require('../models/user.models');
+const Review = require('../models/review.models');
 //importing cloudinary services
-const { uploadInCloudinary } = require("../services/cloudinary.services")
+const { uploadInCloudinary } = require("../services/cloudinary.services");
+
+//importing utility functions
+const { getNearbyRooms } = require("../utils/rooms.utils");
+
 
 const addRoom = async (req, res) => {
     try {
@@ -132,8 +137,7 @@ const getFilteredRooms = async (req, res) => {
             minPrice,
             maxPrice,
             isPremium,
-            address,
-            city,
+            address
         } = req.query;
 
         // Build dynamic query
@@ -171,6 +175,7 @@ const getFilteredRooms = async (req, res) => {
         });
     }
 };
+
 //rooms based on location
 const locationBasedRooms = async (req, res) => {
     try {
@@ -186,8 +191,17 @@ const locationBasedRooms = async (req, res) => {
             })
         }
         const nearbyRooms = await getNearbyRooms(userLocationLat, userLocationLng);
+        if (nearbyRooms.length === 0) {
+            return res.status(404).json({
+                error: "NO_ROOMS_FOUND",
+                message: "No rooms available nearby"
+            })
+        }
 
-
+        return res.status(200).json({
+            rooms: nearbyRooms,
+            message: "Rooms available nearby"
+        })
     } catch (error) {
         console.error("DEBUG: Error in locationBasedRooms:", error);
         return res.status(500).json({
