@@ -1,7 +1,6 @@
 //importing room schema
 const Room = require("../models/room.models");
-const Review = require("../models/review.models");
-
+const User = require('../models/user.models');
 //importing cloudinary services
 const { uploadInCloudinary } = require("../services/cloudinary.services")
 
@@ -31,8 +30,8 @@ const addRoom = async (req, res) => {
             description,
             landlordId,
             location: {
-                latitude,
-                longitude
+                type: "Point",
+                coordinates: [longitude, latitude]
             },
             roomImages,
             isPromoted
@@ -126,32 +125,7 @@ const deleteRoom = async (req, res) => {
     }
 };
 
-//get all rooms create by a landloard
-const roomsByLandlord = async (req, res) => {
-    try {
-        const landlordId = req.user._id;
-        const rooms = await Room.find({ landlordId });
-        if (rooms.length === 0) {
-            return res.status(200).json({
-                error: "NO_ROOMS_CREATED",
-                message: "You don't have any room listed."
-            });
-        }
-        return res.status(200).json({
-            message: "Rooms created by you",
-            rooms
-        });
-    } catch (error) {
-        console.log("DEBUG: Error from roomsByLandlord: ", error);
-        return res.status(500).json({
-            error: "LANDLORDS_ROOM_ERROR",
-            message: "Something went wrong while fetching rooms"
-        });
-    }
-}
-
 //filter based rooms returned
-
 const getFilteredRooms = async (req, res) => {
     try {
         const {
@@ -197,8 +171,31 @@ const getFilteredRooms = async (req, res) => {
         });
     }
 };
+//rooms based on location
+const locationBasedRooms = async (req, res) => {
+    try {
 
-module.exports = { getFilteredRooms };
+        const userId = req.user._id;
+        const user = User.findById(userId);
+        const userLocationLat = user.location.latitude;
+        const userLocationLng = user.location.longitude;
+        if (!userLocationLat || !userLocationLon) {
+            return res.status(404).json({
+                error: "LOCATION_NOT_FOUND",
+                message: "User location not available"
+            })
+        }
+        const nearbyRooms = await getNearbyRooms(userLocationLat, userLocationLng);
 
 
-module.exports = { addRoom, updateRoom, deleteRoom }
+    } catch (error) {
+        console.error("DEBUG: Error in locationBasedRooms:", error);
+        return res.status(500).json({
+            error: "FETCH_ROOMS_ERROR",
+            message: "Something went wrong while fetching rooms"
+        });
+    }
+}
+
+
+module.exports = { addRoom, updateRoom, deleteRoom, getFilteredRooms, locationBasedRooms }

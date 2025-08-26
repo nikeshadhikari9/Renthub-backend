@@ -22,14 +22,14 @@ const roomSchema = new mongoose.Schema(
         },
         location: {
             type: {
-                latitude: {
-                    type: Number,
-
-                },
-                longitude: {
-                    type: Number,
-                },
+                type: String,
+                enum: ['Point'],
+                required: true
             },
+            coordinates: {
+                type: [Number],
+                required: true
+            }
         },
         roomImages: {
             type: [String],
@@ -50,5 +50,7 @@ const roomSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
+
+roomSchema.index({ location: "2dsphere" });
 const Room = mongoose.model("Room", roomSchema);
 module.exports = Room;
