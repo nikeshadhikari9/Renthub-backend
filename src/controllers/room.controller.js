@@ -6,7 +6,7 @@ const Review = require('../models/review.models');
 const { uploadInCloudinary } = require("../services/cloudinary.services");
 
 //importing utility functions
-const { getNearbyRooms } = require("../utils/rooms.utils");
+const { getNearbyRooms, roomsWithReviews } = require("../utils/room.utils");
 
 
 const addRoom = async (req, res) => {
@@ -152,16 +152,7 @@ const getFilteredRooms = async (req, res) => {
         const rooms = await Room.find(query).lean(); // lean() for plain JS objects
 
         // Calculate average rating for each room
-        const roomsWithRating = await Promise.all(
-            rooms.map(async (room) => {
-                const reviews = await Review.find({ roomId: room._id });
-                const avgRating =
-                    reviews.length > 0
-                        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-                        : null;
-                return { ...room, avgRating };
-            })
-        );
+        const roomsWithRating = roomsWithReviews(rooms);
 
         return res.status(200).json({
             message: "Filtered rooms fetched successfully",
@@ -210,6 +201,7 @@ const locationBasedRooms = async (req, res) => {
         });
     }
 }
+
 
 
 module.exports = { addRoom, updateRoom, deleteRoom, getFilteredRooms, locationBasedRooms }
