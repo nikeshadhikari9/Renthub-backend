@@ -17,7 +17,11 @@ const uploadInCloudinary = async (localFilePath) => {
             folder: 'Room-Images',
             use_filename: true
         });
-        fs.unlinkSync(localFilePath);
+        try {
+            fs.unlinkSync(localFilePath);
+        } catch (err) {
+            console.error("Error deleting file:", err);
+        }
         return result;
     } catch (error) {
         console.error("Error uploading file to Cloudinary:", error);
