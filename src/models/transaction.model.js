@@ -22,6 +22,11 @@ const transactionSchema = new mongoose.Schema(
         purpose: {
             type: String,
             enum: ["promoted-room", "advertisements"], // Example statuses
+        },
+        mode: {
+            type: String,
+            enum: ["esewa", "khalti", "mobile-banking"],
+            default: "esewa"
         }
     },
     {
