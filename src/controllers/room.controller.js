@@ -28,6 +28,7 @@ const addRoom = async (req, res) => {
                 console.error(`Failed to upload ${file.originalname}:`, err);
             }
         }
+
         const roomCreated = await Room.create({
             title,
             address,
@@ -41,6 +42,24 @@ const addRoom = async (req, res) => {
             roomImages,
             isPromoted
         })
+
+        let paymentUrl = null;
+        if (isPromoted) {
+            try {
+                const { url } = await esewaInitiatePayment(300, "promoted-room", "esewa", landlordId);
+                paymentUrl = url;
+                if (!paymentUrl) {
+                    return res.status(400).json({ error: "PAYMENT_ERROR", message: "PaymentUrl is missing" });
+                }
+                return res.status(200).json({
+                    url: paymentUrl
+                })
+
+            } catch (err) {
+                return res.status(400).json({ error: "PAYMENT_ERROR", message: err.message });
+            }
+        }
+
         return res.status(201).json({
             message: "Room added successfully",
             room: {
@@ -207,7 +226,7 @@ const locationBasedRooms = async (req, res) => {
 //get featured rooms
 const getFeaturedRooms = async (rea, res) => {
     try {
-        const rooms = await Room.find({ isPromoted: true });
+        const rooms = await Room.find({ isPromoted: true, paid: true });
         if (rooms.length === 0) {
             return res.status(404).json({
                 error: "NO_FEATURED_ROOMS",
