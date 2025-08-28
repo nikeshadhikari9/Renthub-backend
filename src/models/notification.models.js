@@ -1,23 +1,28 @@
 const mongoose = require('mongoose');
 const NotificationSchema = new mongoose.Schema({
-    userId: { 
-        type: mongoose.Schema.Types.ObjectId, ref: "User" 
+    userId: {
+        type: mongoose.Schema.Types.ObjectId, ref: "User"
     },
-    title: { 
-        type: String, 
+    title: {
+        type: String,
         required: true
     },
     message: {
         type: String,
-        required:true
+        required: true
     },
-    isRead: { 
-        type: Boolean, 
-        default: false 
+    isRead: {
+        type: Boolean,
+        default: false
     },
-    createdAt: { 
-        type: Date, 
-        default: Date.now 
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    type: {
+        type: String,
+        enum: ["advertisements", "info", "request", "warning"],
+        default: "info",
     }
 });
 const Notification = mongoose.model("Notification", NotificationSchema);

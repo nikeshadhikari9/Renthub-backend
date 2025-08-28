@@ -181,13 +181,15 @@ const locationBasedRooms = async (req, res) => {
                 message: "User location not available"
             })
         }
-        const nearbyRooms = await getNearbyRooms(userLocationLat, userLocationLng);
-        if (nearbyRooms.length === 0) {
+        const rooms = await getNearbyRooms(userLocationLat, userLocationLng);
+        if (rooms.length === 0) {
             return res.status(404).json({
                 error: "NO_ROOMS_FOUND",
                 message: "No rooms available nearby"
             })
         }
+        //add reviews to room data
+        const nearbyRooms = roomsWithReviews(rooms);
 
         return res.status(200).json({
             rooms: nearbyRooms,
@@ -202,6 +204,32 @@ const locationBasedRooms = async (req, res) => {
     }
 }
 
+//get featured rooms
+const getFeaturedRooms = async (rea, res) => {
+    try {
+        const rooms = await Room.find({ isPromoted: true });
+        if (rooms.length === 0) {
+            return res.status(404).json({
+                error: "NO_FEATURED_ROOMS",
+                message: "No featured Rooms"
+            })
+        }
+
+        const featuredRooms = roomsWithReviews(rooms);
+
+        return res.status(200).json({
+            message: "Featurd rooms found",
+            rooms: featuredRooms
+        })
+    } catch (error) {
+        console.error("DEBUG: Error in featuredRooms:", error);
+        return res.status(500).json({
+            error: "FETCH_ROOMS_ERROR",
+            message: "Something went wrong while fetching rooms"
+        });
+    }
+}
 
 
-module.exports = { addRoom, updateRoom, deleteRoom, getFilteredRooms, locationBasedRooms }
+
+module.exports = { addRoom, updateRoom, deleteRoom, getFilteredRooms, locationBasedRooms, getFeaturedRooms }
