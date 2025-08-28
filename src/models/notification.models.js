@@ -23,6 +23,7 @@ const NotificationSchema = new mongoose.Schema({
         type: String,
         enum: ["advertisements", "info", "request", "warning"],
         default: "info",
+
     }
 });
 const Notification = mongoose.model("Notification", NotificationSchema);
