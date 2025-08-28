@@ -9,6 +9,7 @@ const tenantRoutes = require('./src/routes/tenants.routes')
 const userRoutes = require('./src/routes/user.routes')
 const landlordRoutes = require('./src/routes/landlord.routes')
 const roomRoutes = require('./src/routes/room.routes')
+const transactionRoutes = require('./src/routes/transaction.routes')
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
@@ -16,6 +17,7 @@ app.use('/api/room', roomRoutes);
 app.use('/api/tenant', tenantRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/landlord', landlordRoutes);
+app.use('/api/transaction', transactionRoutes);
 
 connectDB();
 
