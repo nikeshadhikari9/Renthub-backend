@@ -1,11 +1,12 @@
-const { EsewaPaymentGateway, EsewaCheckStatus } = require("esewajs")
+const { EsewaPaymentGateway, EsewaCheckStatus, generateUniqueId, } = require("esewajs")
 const Transaction = require("../models/transaction.model.js");
-const { MERCHANT_ID, MERCHANT_SECRET, SUCCESS_URL, FAILURE_URL, ESEWAPAYMENT_URL } = require("../config/env.js")
+const { MERCHANT_ID, MERCHANT_SECRET, SUCCESS_URL, FAILURE_URL, ESEWAPAYMENT_URL, ESEWAPAYMENT_STATUS_CHECK_URL } = require("../config/env.js")
 
-const esewaInitiatePayment = async (req, res) => {
-    const { amount, productId } = req.body;
+const esewaInitiatePayment = async (amount, purpose, mode, userId) => {
+    const productId = generateUniqueId();
+
     if (!amount || !productId) {
-        return res.status(400).json({ message: "Missing amount or productId" });
+        throw new Error("Missing amount or productId");
     }
 
     try {
@@ -18,36 +19,42 @@ const esewaInitiatePayment = async (req, res) => {
             ESEWAPAYMENT_URL
         );
 
-        // console.log("Esewa response:", reqPayment);
-
         if (!reqPayment || reqPayment.status !== 200) {
-            return res.status(400).json({ message: "Error sending data to Esewa" });
+            throw new Error("Error sending data to Esewa");
         }
 
-        const transaction = await Transaction.create({ product_id: productId, amount });
-        return res.json({ url: reqPayment.request.res.responseUrl });
+        const transaction = await Transaction.create({
+            product_id: productId,
+            amount,
+            userId,
+            purpose,
+            mode
+        });
+
+        const url = reqPayment.request?.res?.responseUrl;
+        if (!url) {
+            throw new Error("Esewa did not return a valid URL");
+        }
+
+        return { url, transaction };
     } catch (error) {
         console.error("Esewa initiation error:", error);
-        return res.status(500).json({ message: "Server error", error: error.message });
+        throw error;
     }
 };
 
 
-
-
 const paymentStatus = async (req, res) => {
-    const { product_id } = req.body; // Extract data from request body
-    console.log("Product ID", product_id)
+    const { transaction_id } = req.body; // Extract data from request body
+    // console.log("Product ID", transaction_id)
     try {
         // Find the transaction by its signature
-        const transaction = await Transaction.findOne({ product_id });
+        const transaction = await Transaction.findOne({ transaction_id });
         if (!transaction) {
-            return res.status(400).json({ message: "Transaction not found" });
+            return res.status(400).json({ error: "TRANSACTION_NOT_FOUND", message: "Transaction not found" });
         }
 
-        const paymentStatusCheck = await EsewaCheckStatus(transaction.amount, transaction.product_id, process.env.MERCHANT_ID, process.env.ESEWAPAYMENT_STATUS_CHECK_URL)
-
-
+        const paymentStatusCheck = await EsewaCheckStatus(transaction.amount, transaction.product_id, MERCHANT_ID, ESEWAPAYMENT_STATUS_CHECK_URL)
 
         if (paymentStatusCheck.status === 200) {
             // Update the transaction status
