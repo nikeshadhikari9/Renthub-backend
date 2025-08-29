@@ -6,7 +6,10 @@ const BlacklistedToken = require("../models/blacklistedToken.models");
 const { isPasswordValid, generateToken } = require('../utils/password.utils');
 
 //import semail sending service
-const { sendEmail, resetEmailBody } = require("../services/email.services");
+const { sendEmail } = require("../services/email.services");
+
+//import reset email body 
+const { resetEmailBody } = require("../services/email.bodies.service")
 
 //function for registerUser
 const registerUser = async (req, res) => {
