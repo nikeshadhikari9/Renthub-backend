@@ -7,10 +7,14 @@ const AdSchema = new mongoose.Schema({
     contact: {
         type: String
     },
+    email: {
+        type: String,
+        default: null
+    },
     description: {
         type: String
     },
-    location: {
+    address: {
         type: String
     },
     adImage: {
@@ -19,16 +23,28 @@ const AdSchema = new mongoose.Schema({
     createdBy: {
         type: String
     },
+    type: {
+        type: String,
+        enum: ["basic", "featured", "premium"],
+        default: "basic"
+    },
     status: {
         type: String,
         enum: ["pending", "approved", "rejected"],
         default: "pending"
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
+    paymentStatus: {
+        type: ["pending", "completed", "refunded", "rejected"],
+        default: "pending"
+    },
+    startTime: {
+        type: Date
+    },
+    endTime: {
+        type: Date
     }
-});
+}, { timestamps: true }
+);
 
 const Advertisement = mongoose.model("Advertisement", AdSchema);
 module.exports = Advertisement;
