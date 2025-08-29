@@ -1,7 +1,7 @@
 const { EsewaPaymentGateway, EsewaCheckStatus, generateUniqueId, } = require("esewajs")
 const Transaction = require("../models/transaction.model.js");
 const { MERCHANT_ID, MERCHANT_SECRET, SUCCESS_URL, FAILURE_URL, ESEWAPAYMENT_URL, ESEWAPAYMENT_STATUS_CHECK_URL } = require("../config/env.js")
-
+const Room = require("../models/room.models.js")
 const esewaInitiatePayment = async (amount, purpose, mode, userId) => {
     const productId = generateUniqueId();
 
@@ -45,11 +45,11 @@ const esewaInitiatePayment = async (amount, purpose, mode, userId) => {
 
 
 const paymentStatus = async (req, res) => {
-    const { transaction_id } = req.body; // Extract data from request body
+    const { product_id, room_id } = req.body; // Extract data from request body
     // console.log("Product ID", transaction_id)
     try {
         // Find the transaction by its signature
-        const transaction = await Transaction.findOne({ transaction_id });
+        const transaction = await Transaction.findOne({ product_id });
         if (!transaction) {
             return res.status(400).json({ error: "TRANSACTION_NOT_FOUND", message: "Transaction not found" });
         }
@@ -60,13 +60,16 @@ const paymentStatus = async (req, res) => {
             // Update the transaction status
             transaction.status = paymentStatusCheck.data.status;
             await transaction.save();
-            res
+            const room = await Room.findById(room_id);
+            room.paid = true;
+            await room.save();
+            return res
                 .status(200)
-                .json({ message: "Transaction status updated successfully" });
+                .json({ message: "Transaction completed successfully" });
         }
     } catch (error) {
         console.error("Error updating transaction status:", error);
-        res.status(500).json({ message: "Server error", error: error.message });
+        return res.status(500).json({ message: "Server error", error: error.message });
     }
 };
 
