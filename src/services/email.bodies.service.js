@@ -1,0 +1,134 @@
+// Reset Email
+const resetEmailBody = (user) => {
+    return `<div
+    style="max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); font-family: 'Arial', sans-serif;">
+
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #6b46c1, #4f46e5); padding: 25px; text-align: center;">
+        <h1 style="margin: 0; color: white; font-size: 24px; font-weight: 600;">
+            Rent Hub
+        </h1>
+        <p style="color: rgba(255, 255, 255, 0.9); margin: 8px 0 0; font-size: 16px;">
+            Your Trusted Rental Platform
+        </p>
+    </div>
+
+    <!-- Email Body -->
+    <div style="padding: 30px;">
+        <p style="font-size: 16px; color: #4a5568; margin-bottom: 20px;">
+            Hello, <strong style="color: #2d3748;">${user.fullName}</strong>
+        </p>
+
+        <p style="font-size: 16px; color: #4a5568; line-height: 1.5;">
+            You requested to reset your Rent Hub password. Use the code below to verify your identity:
+        </p>
+
+        <!-- Token Box -->
+        <div
+            style="background: #f8fafc; border: 1px dashed #cbd5e0; border-radius: 8px; padding: 20px; text-align: center; margin: 25px 0;">
+            <div style="font-size: 32px; font-weight: 700; letter-spacing: 5px; color: #6b46c1; margin: 10px 0;">
+                ${user.token}
+            </div>
+            <div style="font-size: 14px; color: #718096;">
+                Valid for 5 minutes only
+            </div>
+        </div>
+
+        <p style="font-size: 15px; color: #4a5568; line-height: 1.5;">
+            <span style="display: inline-block; width: 20px;">⚠️</span>
+            <strong>Important:</strong> Never share this code with anyone.
+        </p>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #edf2f7;">
+            <p style="font-size: 14px; color: #718096; margin: 5px 0;">
+                If you didn't request this, please secure your account.
+            </p>
+            <p style="font-size: 14px; color: #718096; margin: 5px 0;">
+                Need help? <a href="mailto:support@renthub.com" style="color: #4f46e5; text-decoration: none;">Contact
+                    our support team</a>.
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f8fafc; padding: 15px; text-align: center; font-size: 12px; color: #718096;">
+        © 2025 Rent Hub. All rights reserved.<br>
+        <span style="font-size: 11px;">Kachankawal-2, Jhapa, Nepal</span>
+    </div>
+</div>`;
+};
+
+
+// Payment / Promotion Email
+const paymentEmail = (advertisement, paymentUrl) => {
+    return `<div
+    style="max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); font-family: 'Arial', sans-serif;">
+
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #6b46c1, #4f46e5); padding: 25px; text-align: center;">
+        <h1 style="margin: 0; color: white; font-size: 24px; font-weight: 600;">
+            Rent Hub
+        </h1>
+        <p style="color: rgba(255, 255, 255, 0.9); margin: 8px 0 0; font-size: 16px;">
+            Your Trusted Rental Platform
+        </p>
+    </div>
+
+    <!-- Email Body -->
+    <div style="padding: 30px;">
+        <p style="font-size: 16px; color: #4a5568; margin-bottom: 20px;">
+            Dear <strong style="color: #2d3748;">${advertisement.name}</strong>,
+        </p>
+
+        <p style="font-size: 16px; color: #4a5568; line-height: 1.6;">
+            Thank you for choosing <strong>Rent Hub</strong> to promote your business.
+            Your <strong>${advertisement.type}</strong> advertisement is ready, and it’s just one step away from going
+            live.
+            To activate your ad and showcase it to thousands of potential customers, please confirm your payment below.
+        </p>
+
+        <!-- Offer Box -->
+        <div
+            style="background: #f8fafc; border: 1px solid #cbd5e0; border-radius: 8px; padding: 20px; text-align: center; margin: 25px 0;">
+            <h2 style="font-size: 20px; margin: 0 0 10px; color: #6b46c1;">Exclusive Promotion</h2>
+            <p style="font-size: 15px; color: #4a5568; margin: 0 0 15px;">
+                Secure your spot today and boost your visibility across our platform.
+            </p>
+
+            <!-- Payment Button -->
+            <a href="${paymentUrl}" target="_blank"
+                style="display: inline-block; background: #38d870; color: white; font-size: 16px; font-weight: bold; padding: 12px 24px; border-radius: 6px; text-decoration: none; box-shadow: 0 3px 6px rgba(0,0,0,0.15);">
+                💳 Confirm & Pay with eSewa
+            </a>
+
+            <p style="font-size: 13px; color: #718096; margin-top: 12px;">
+                100% secure payment powered by eSewa
+            </p>
+        </div>
+
+        <p style="font-size: 15px; color: #4a5568; line-height: 1.6;">
+            Once your payment is confirmed, your advertisement will be <strong>instantly published</strong> and
+            made visible to our large network of active renters and landlords.
+        </p>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #edf2f7;">
+            <p style="font-size: 14px; color: #718096; margin: 5px 0;">
+                Have questions or need help? Our support team is always here for you.
+            </p>
+            <p style="font-size: 14px; color: #718096; margin: 5px 0;">
+                📩 <a href="mailto:support@renthub.com"
+                    style="color: #4f46e5; text-decoration: none;">support@renthub.com</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f8fafc; padding: 15px; text-align: center; font-size: 12px; color: #718096;">
+        © 2025 Rent Hub. All rights reserved.<br>
+        <span style="font-size: 11px;">Kachankawal-2, Jhapa, Nepal</span>
+    </div>
+</div>`;
+}
+
+
+module.exports = { resetEmailBody, paymentEmail };
