@@ -39,14 +39,18 @@ const roomSchema = new mongoose.Schema(
             type: Boolean,
             default: false
         },
+        isPromoted: {
+            type: Boolean,
+            default: false
+        },
+        paid: {
+            type: Boolean,
+            default: false
+        },
         isPremium: {
             type: Boolean,
             default: false
         },
-        isPromoted: {
-            type: Boolean,
-            default: false
-        }
     },
     { timestamps: true }
 );

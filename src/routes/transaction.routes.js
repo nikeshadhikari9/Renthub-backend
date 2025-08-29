@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-const { esewaInitiatePayment, paymentStatus } = require("../controllers/transaction.controller.js")
 const { verifyLoggedInUser } = require("../middlewares/auth.middleware.js")
+const { paymentStatus } = require("../controllers/transaction.controller.js")
 
-router.route('/initiate-payment').post(verifyLoggedInUser, esewaInitiatePayment);
-router.route('/payment-status').post(verifyLoggedInUser, paymentStatus);
+// route to verify payment of esewa
+router.route('/esewa/payment-status').post(verifyLoggedInUser, paymentStatus);
 
 module.exports = router;

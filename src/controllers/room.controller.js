@@ -5,6 +5,8 @@ const Review = require('../models/review.models');
 //importing cloudinary services
 const { uploadInCloudinary } = require("../services/cloudinary.services");
 
+const { esewaInitiatePayment } = require("./transaction.controller")
+
 //importing utility functions
 const { getNearbyRooms, roomsWithReviews } = require("../utils/room.utils");
 
