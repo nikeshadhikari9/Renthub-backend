@@ -196,7 +196,7 @@ const locationBasedRooms = async (req, res) => {
         const user = User.findById(userId);
         const userLocationLat = user.location.latitude;
         const userLocationLng = user.location.longitude;
-        if (!userLocationLat || !userLocationLon) {
+        if (!userLocationLat || !userLocationLng) {
             return res.status(404).json({
                 error: "LOCATION_NOT_FOUND",
                 message: "User location not available"
