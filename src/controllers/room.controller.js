@@ -210,10 +210,8 @@ const locationBasedRooms = async (req, res) => {
             })
         }
         //add reviews to room data
-        const nearbyRooms = roomsWithReviews(rooms);
-
         return res.status(200).json({
-            rooms: nearbyRooms,
+            rooms: rooms,
             message: "Rooms available nearby"
         })
     } catch (error) {
