@@ -15,7 +15,7 @@ const getNearbyRooms = async (lat, lng) => {
         });
 
         // Step 2: For each room, fetch its reviews
-        const rooms = roomsWithReviews(nearbyRooms);
+        const rooms = await roomsWithReviews(nearbyRooms);
 
         return rooms;
     } catch (error) {
@@ -27,7 +27,7 @@ const getNearbyRooms = async (lat, lng) => {
 //rooms with reviews
 const roomsWithReviews = async (rooms) => {
     try {
-        return await Promise.all(
+        const roomsWithReviewss = await Promise.all(
             rooms.map(async (room) => {
                 const reviews = await Review.find({ roomId: room._id }).populate("userId", "fullName profileImage"); // optional: include user name
                 const avgRating = reviews.length > 0
@@ -41,6 +41,7 @@ const roomsWithReviews = async (rooms) => {
                 };
             })
         );
+        return roomsWithReviews;
 
     } catch (error) {
         console.log("DEBUG:Error in roomsWithReviews (room.utility.js): ", error)
