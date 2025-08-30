@@ -68,9 +68,9 @@ const getAllRooms = async (req, res) => {
     }
 }
 
-const getAllAdvertisementers = async (req, res) => {
+const getAllAdvertisements = async (req, res) => {
     try {
-        // const allAdertisements;
+
     } catch (error) {
 
     }
@@ -158,66 +158,208 @@ const addAdvertisement = async (req, res) => {
 }
 
 
-const addRoom = async (req, res) => {
+
+//filter based rooms returned
+const getFilteredRooms = async (req, res) => {
     try {
-        const { title, address, price, description, latitude, longitude, isPromoted } = req.body;
-        const landlordId = req.user._id;
-        if (latitude == null || longitude == null) {
-            return res.status(400).json({ error: "FIELDS_MISSING", message: "Location is required" });
-        }
-        if (!req.files) {
-            return res.status(400).json({ error: "FIELDS_MISSING", message: "Room Images are required" })
-        }
-        const roomImages = [];
-        for (const file of req.files) {
-            try {
-                const result = await uploadInCloudinary(file.path);
-                roomImages.push(result.url);
-            } catch (err) {
-                console.error(`Failed to upload ${file.originalname}:`, err);
-            }
-        }
-
-        const roomCreated = await Room.create({
-            title,
+        const {
+            minPrice,
+            maxPrice,
+            isPremium,
+            isPromoted,
+            approved,
+            paid,
             address,
-            price,
-            description,
-            landlordId,
-            location: {
-                type: "Point",
-                coordinates: [longitude, latitude]
-            },
-            roomImages,
-            isPromoted
+            lat,
+            lng,
+            maxDistance, // optional radius for location search (in meters)
+        } = req.query;
+
+        // Build dynamic query
+        const query = {};
+
+        // Price range
+        if (minPrice) query.price = { ...query.price, $gte: Number(minPrice) };
+        if (maxPrice) query.price = { ...query.price, $lte: Number(maxPrice) };
+
+        // Boolean flags
+        if (isPremium !== undefined) query.isPremium = isPremium === "true";
+        if (isPromoted !== undefined) query.isPromoted = isPromoted === "true";
+        if (approved !== undefined) query.approved = approved === "true";
+        if (paid !== undefined) query.paid = paid === "true";
+
+        // Address search (case-insensitive)
+        if (address) query.address = { $regex: address, $options: "i" };
+
+        // Location search (within radius if lat/lng provided)
+        if (lat && lng) {
+            query.location = {
+                $near: {
+                    $geometry: { type: "Point", coordinates: [Number(lng), Number(lat)] },
+                    $maxDistance: maxDistance ? Number(maxDistance) : 1000, // default 1km
+                },
+            };
+        }
+
+        // Fetch rooms
+        const rooms = await Room.find(query).lean();
+
+        // Attach reviews + avgRating
+        const roomsWithRating = await roomsWithReviews(rooms);
+
+        return res.status(200).json({
+            message: "Filtered rooms fetched successfully",
+            rooms: roomsWithRating,
+        });
+    } catch (error) {
+        console.error("DEBUG: Error in getFilteredRooms:", error);
+        return res.status(500).json({
+            error: "FETCH_ROOMS_ERROR",
+            message: "Something went wrong while fetching rooms",
+        });
+    }
+};
+
+const getFilteredUsers = async (req, res) => {
+    try {
+        const filters = req.query
+        const users = await filterUsers(filters)
+        return res.status(200).json({
+            users: users,
+            message: "Users based on filtered parameters"
         })
+    } catch (error) {
+        console.error("Error in filteredUsers:", error);
+        return res.status(500).json({
+            error: "FETCH_USERS_ERROR",
+            message: "Something went wrong while fetching users",
+        });
+    }
+};
 
-        let paymentUrl = null;
-        if (isPromoted) {
+const filterUsers = async (filters) => {
+    try {
+        const query = {};
+
+        // Text-based filters (search in multiple fields)
+        if (filters.search) {
+            query.$or = [
+                { fullName: { $regex: filters.search, $options: "i" } },
+                { profession: { $regex: filters.search, $options: "i" } },
+                { email: { $regex: filters.search, $options: "i" } },
+                { contact: { $regex: filters.search, $options: "i" } },
+                { address: { $regex: filters.search, $options: "i" } },
+            ];
+        }
+
+        // Role filter
+        if (filters.role) query.role = filters.role;
+
+        // Gender filter
+        if (filters.gender) query.gender = filters.gender;
+
+        // Address filter
+        if (filters.address) query.address = { $regex: filters.address, $options: "i" };
+
+        // Verified filter
+        if (filters.isVerified !== undefined) query.isVerified = filters.isVerified === "true";
+
+        // You can add more filters as needed
+
+        const users = await User.find(query)
+            .select("-password -token -tokenDate") // exclude password
+            .lean();
+
+        return users;
+    } catch (error) {
+        console.error("Error in filterUsers:", error);
+        throw error;
+    }
+};
+
+//update Advertisements
+const updateAdvertisement = async (req, res) => {
+    try {
+        const { id, businessName, contact, email, description, address, startDate, endDate, type } = req.body;
+
+        // Check if advertisement exists
+        const advertisement = await Advertisement.findById(id);
+        if (!advertisement) {
+            return res.status(404).json({
+                error: "NOT_FOUND",
+                message: "Advertisement not found",
+            });
+        }
+
+        // Handle new image upload if provided
+        let adImage = advertisement.adImage; // keep old one by default
+        if (req.file) {
             try {
-                const { url } = await esewaInitiatePayment(300, "promoted-room", "esewa", landlordId);
-                paymentUrl = url;
-                if (!paymentUrl) {
-                    return res.status(400).json({ error: "PAYMENT_ERROR", message: "PaymentUrl is missing" });
-                }
-                return res.status(200).json({
-                    url: paymentUrl
-                })
-
+                const result = await uploadInCloudinary(req.file.path);
+                adImage = result.url;
             } catch (err) {
-                return res.status(400).json({ error: "PAYMENT_ERROR", message: err.message });
+                console.error(`Failed to upload new image:`, err);
+                return res.status(500).json({ error: "IMAGE_UPLOAD_ERROR", message: "Image upload failed" });
             }
         }
 
-        return res.status(201).json({
-            message: "Room added successfully",
-            room: {
-                title: title
-            }
-        })
+        // Update fields only if they are provided
+        if (businessName) advertisement.businessName = businessName;
+        if (contact) advertisement.contact = contact;
+        if (email) advertisement.email = email;
+        if (description) advertisement.description = description;
+        if (address) advertisement.address = address;
+        if (type) advertisement.type = type;
+        if (startDate) advertisement.startTime = new Date(startDate);
+        if (endDate) advertisement.endTime = new Date(endDate);
+        advertisement.adImage = adImage;
 
+        // Save updated advertisement
+        await advertisement.save();
+
+        return res.status(200).json({
+            message: "Advertisement updated successfully",
+            advertisement,
+        });
     } catch (error) {
-        console.log("DEBUG: Error from addRoom: ", error)
-        return res.status(500).json({ error: "UPDATE_ROOM_ERROR", message: "Something went wrong while adding room" });
+        console.error("DEBUG: Error in updateAdvertisement:", error);
+        return res.status(500).json({
+            error: "UPDATE_ADVERTISEMENT_ERROR",
+            message: "Something went wrong while updating advertisement",
+        });
     }
-}
+};
+
+
+//delete Advertisements
+const deleteAdvertisement = async (req, res) => {
+    try {
+        const { advertisementId } = req.params;
+
+
+        const advertisement = await Advertisement.findOne({ _id: advertisementId });
+        if (!advertisement) {
+            return res.status(404).json({
+                error: "ADVERTISEMENT_NOT_FOUND",
+                message: "Advertisement not found or you are not authorized"
+            });
+        }
+
+        // Delete the room
+        await Advertisement.deleteOne({ _id: advertisementId });
+
+        return res.status(200).json({
+            message: "Advertisement deleted successfully"
+        });
+    } catch (error) {
+        console.log("DEBUG: Error from deleteAdvertisement: ", error);
+        return res.status(500).json({
+            error: "DELETE_ADVERTISEMENT_ERROR",
+            message: "Something went wrong while deleting advertisement"
+        });
+    }
+};
+
+
+
+module.exports = { addAdvertisement, getALLAdmins, getAllLandlords, getAllRooms, getAllAdvertisements, getAllTenants, getFilteredUsers, filterUsers, getFilteredRooms, deleteAdvertisement, updateAdvertisement }
