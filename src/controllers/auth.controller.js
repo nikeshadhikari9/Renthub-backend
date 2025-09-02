@@ -108,6 +108,39 @@ const loginUser = async (req, res) => {
             .json({ error: "LOGIN_ERROR", message: "Login error" })
     }
 }
+const myDetails = async (req, res) => {
+    try {
+        const user = req.user._id;
+
+        if (!user) {
+            return res.status(404)
+                .json({ error: "USER_NOT_FOUND", message: "User not found." })
+        }
+        return res.status(201)
+            .json({
+                message: "User Details Get Successfully",
+                token: token,
+                user: {
+                    _id: user._id,
+                    fullName: user.fullName,
+                    email: user.email,
+                    contactNum: user.contactNum,
+                    address: user.address,
+                    role: user.role,
+                    gender: user.gender,
+                    profession: user.profession,
+                    location: user.location,
+                    profession: user.profession,
+                    profileImage: user.profileImage,
+                    isVerified: user.isVerified
+                }
+            });
+
+
+    } catch (error) {
+
+    }
+}
 
 //controller for admin login
 const loginAdmin = async (req, res) => {
@@ -240,4 +273,4 @@ const forgetPassword = async (req, res) => {
 
 
 
-module.exports = { registerUser, loginUser, loginAdmin, logout, resetPassword, forgetPasswordEmail, forgetPassword }
+module.exports = { registerUser, loginUser, loginAdmin, logout, resetPassword, forgetPasswordEmail, forgetPassword, myDetails }
