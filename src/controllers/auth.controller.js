@@ -138,7 +138,8 @@ const myDetails = async (req, res) => {
 
 
     } catch (error) {
-
+        return res.status(401)
+            .json({ error: "AUTH_ERROR", message: "User not logged in!" })
     }
 }
 
