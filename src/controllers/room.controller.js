@@ -150,6 +150,36 @@ const deleteRoom = async (req, res) => {
         });
     }
 };
+// Unlist Room
+const unlistRoom = async (req, res) => {
+    try {
+        const { roomId } = req.params;
+        const landlordId = req.user._id;
+
+        // Find the room and make sure it belongs to the logged-in landlord
+        const room = await Room.findOne({ _id: roomId, landlordId });
+        if (!room) {
+            return res.status(404).json({
+                error: "ROOM_NOT_FOUND",
+                message: "Room not found or you are not authorized"
+            });
+        }
+
+        // unlisting/ unpublishing the room
+        room.listed = false;
+        await room.save()
+
+        return res.status(200).json({
+            message: "Room unlisted successfully"
+        });
+    } catch (error) {
+        console.log("DEBUG: Error from unlistRoom: ", error);
+        return res.status(500).json({
+            error: "UNLIST_ROOM_ERROR",
+            message: "Something went wrong while unlisting room"
+        });
+    }
+};
 
 //filter based rooms returned
 const getFilteredRooms = async (req, res) => {
@@ -251,4 +281,4 @@ const getFeaturedRooms = async (rea, res) => {
 
 
 
-module.exports = { addRoom, updateRoom, deleteRoom, getFilteredRooms, locationBasedRooms, getFeaturedRooms }
+module.exports = { addRoom, updateRoom, deleteRoom, getFilteredRooms, locationBasedRooms, getFeaturedRooms, unlistRoom }

@@ -6,12 +6,13 @@ const upload = require("../middlewares/multer.middleware.js");
 const { verifyLandlord, verifyLoggedInUser } = require("../middlewares/auth.middleware.js")
 
 //importing controllers
-const { addRoom, updateRoom, deleteRoom, getFilteredRooms, locationBasedRooms, getFeaturedRooms } = require("../controllers/room.controller.js")
+const { addRoom, updateRoom, deleteRoom, getFilteredRooms, locationBasedRooms, getFeaturedRooms, unlistRoom } = require("../controllers/room.controller.js")
 
 //room routes
 router.route('/add-room').post(verifyLandlord, upload.array('images'), addRoom);
 router.route('/update-room').patch(verifyLandlord, upload.array('images'), updateRoom);
 router.route('/delete-room/:roomId').delete(verifyLandlord, deleteRoom);
+router.route('/unlist-room/:roomId').patch(verifyLandlord, unlistRoom);
 router.route('/nearby-rooms').get(verifyLoggedInUser, locationBasedRooms);
 router.route('/filtered-rooms').post(verifyLoggedInUser, getFilteredRooms);
 router.route('/featured-rooms').get(verifyLoggedInUser, getFeaturedRooms);
