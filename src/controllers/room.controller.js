@@ -13,8 +13,10 @@ const { getNearbyRooms, roomsWithReviews } = require("../utils/room.utils");
 
 const addRoom = async (req, res) => {
     try {
-        const { title, address, price, description, latitude, longitude, isPromoted } = req.body;
+        const { title, address, price, description, latitude, longitude, isPromoted, altContactNum } = req.body;
         const landlordId = req.user._id;
+        const landlord = await User.findById(landlordId);
+        const landlordContactNum = landlord.contactNum;
         if (latitude == null || longitude == null) {
             return res.status(400).json({ error: "FIELDS_MISSING", message: "Location is required" });
         }
@@ -41,6 +43,8 @@ const addRoom = async (req, res) => {
                 type: "Point",
                 coordinates: [longitude, latitude]
             },
+            contactNum: landlordContactNum,
+            contactNum2: altContactNum,
             roomImages,
             isPromoted
         })
@@ -165,7 +169,7 @@ const unlistRoom = async (req, res) => {
             });
         }
 
-        // unlisting/ unpublishing the room
+        // unlisting or unpublishing the room
         room.listed = false;
         await room.save()
 
@@ -187,7 +191,6 @@ const getFilteredRooms = async (req, res) => {
         const {
             minPrice,
             maxPrice,
-            isPremium,
             address
         } = req.query;
 
@@ -196,9 +199,8 @@ const getFilteredRooms = async (req, res) => {
 
         if (minPrice) query.price = { ...query.price, $gte: Number(minPrice) };
         if (maxPrice) query.price = { ...query.price, $lte: Number(maxPrice) };
-        if (isPremium) query.isPremium = isPremium === "true";
         if (address) query.address = { $regex: address, $options: "i" }; // case-insensitive partial match
-
+        query.listed = true;
         // Fetch rooms
         const rooms = await Room.find(query).lean(); // lean() for plain JS objects
 
@@ -256,7 +258,7 @@ const locationBasedRooms = async (req, res) => {
 //get featured rooms
 const getFeaturedRooms = async (rea, res) => {
     try {
-        const rooms = await Room.find({ isPromoted: true, paid: true });
+        const rooms = await Room.find({ isPromoted: true, paid: true, listed: true });
         if (rooms.length === 0) {
             return res.status(404).json({
                 error: "NO_FEATURED_ROOMS",
