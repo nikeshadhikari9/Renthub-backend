@@ -11,8 +11,9 @@ const getNearbyRooms = async (lat, lng) => {
                     $geometry: { type: "Point", coordinates: [lng, lat] },
                     $maxDistance: 1000
                 }
-            }
-        });
+            },
+            listed: true
+        }).lean();
 
         // Step 2: For each room, fetch its reviews
         const rooms = await roomsWithReviews(nearbyRooms);
@@ -27,7 +28,7 @@ const getNearbyRooms = async (lat, lng) => {
 //rooms with reviews
 const roomsWithReviews = async (rooms) => {
     try {
-        const roomsWithReviewss = await Promise.all(
+        const roomsWithReviews = await Promise.all(
             rooms.map(async (room) => {
                 const reviews = await Review.find({ roomId: room._id }).populate("userId", "fullName profileImage"); // optional: include user name
                 const avgRating = reviews.length > 0
