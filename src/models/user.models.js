@@ -37,8 +37,7 @@ const userSchema = new mongoose.Schema(
         },
         profession: {
             type: String,
-            required: true
-
+            default: null
         },
         profileImage: {
             type: String,
