@@ -15,7 +15,7 @@ const { resetEmailBody } = require("../services/email.bodies.service")
 const registerUser = async (req, res) => {
     try {
         //extract data from body from frontend
-        const { fullName, email, contactNum, address, gender, password, role, profession } = req.body;
+        const { fullName, email, contactNum, address, gender, password, role } = req.body;
         //check existedUser with email and contact Number
         const checkExistedUserWithEmail = await User.findOne({ email });
         const checkExistedUserWithNumber = await User.findOne({ contactNum });
@@ -40,7 +40,6 @@ const registerUser = async (req, res) => {
             address,
             gender,
             role,
-            profession,
             password
         });
         return res.status(201)
