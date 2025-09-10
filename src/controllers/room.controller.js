@@ -17,6 +17,11 @@ const addRoom = async (req, res) => {
         const landlordId = req.user._id;
         const landlord = await User.findById(landlordId);
         const landlordContactNum = landlord.contactNum;
+        if (altContactNum && (landlordContactNum == altContactNum)) {
+            return res.status(400).json({ error: "REGISTERED_CONTACT", message: "Contact Number already registered" });
+        } else if (!altContactNum) {
+            const contactNum2 = null;
+        }
         if (latitude == null || longitude == null) {
             return res.status(400).json({ error: "FIELDS_MISSING", message: "Location is required" });
         }

@@ -1,3 +1,4 @@
+const { required } = require('joi');
 const mongoose = require('mongoose');
 
 const roomSchema = new mongoose.Schema(
@@ -16,6 +17,15 @@ const roomSchema = new mongoose.Schema(
         },
         description: {
             type: String,
+        },
+        contactNum: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        contactNum2: {
+            type: String,
+            unique: true,
         },
         landlordId: {
             type: mongoose.Schema.Types.ObjectId, ref: "User"
