@@ -13,7 +13,7 @@ const { getNearbyRooms, roomsWithReviews } = require("../utils/room.utils");
 
 const addRoom = async (req, res) => {
     try {
-        const { title, address, price, description, latitude, longitude, isPromoted, altContactNum } = req.body;
+        const { title, address, price, description, latitude, longitude, isPromoted, altContactNum, tags } = req.body;
         const landlordId = req.user._id;
         const landlord = await User.findById(landlordId);
         const landlordContactNum = landlord.contactNum;
@@ -57,7 +57,7 @@ const addRoom = async (req, res) => {
         let paymentUrl = null;
         if (isPromoted) {
             try {
-                const { url } = await esewaInitiatePayment(300, "promoted-room", "esewa", landlordId);
+                const { url } = await esewaInitiatePayment(250, "promoted-room", "esewa", landlordId);
                 paymentUrl = url;
                 if (!paymentUrl) {
                     return res.status(400).json({ error: "PAYMENT_ERROR", message: "PaymentUrl is missing" });
