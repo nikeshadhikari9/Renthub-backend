@@ -37,6 +37,10 @@ const addRoom = async (req, res) => {
                 console.error(`Failed to upload ${file.originalname}:`, err);
             }
         }
+        let newTags;
+        if (tags) {
+            newTags = tags.split(",");
+        }
 
         const roomCreated = await Room.create({
             title,
@@ -50,7 +54,7 @@ const addRoom = async (req, res) => {
             },
             contactNum: landlordContactNum,
             contactNum2: altContactNum,
-            tags,
+            tags: newTags,
             roomImages,
             isPromoted
         })
@@ -88,7 +92,7 @@ const addRoom = async (req, res) => {
 // Update Room
 const updateRoom = async (req, res) => {
     try {
-        const { roomId, title, address, price, description, latitude, longitude, isPromoted } = req.body;
+        const { roomId, title, address, price, description, tags, latitude, longitude, isPromoted } = req.body;
         const landlordId = req.user._id;
 
         // Find the room and make sure it belongs to the logged-in landlord
@@ -102,6 +106,12 @@ const updateRoom = async (req, res) => {
         if (address) room.address = address;
         if (price) room.price = price;
         if (description) room.description = description;
+        let newTags;
+        if (tags) {
+            newTags = tags.split(",");
+            room.tags = newTags;
+        }
+
         if (latitude && longitude) room.location = { latitude, longitude };
         if (typeof isPromoted === "boolean") room.isPromoted = isPromoted;
 
