@@ -13,6 +13,9 @@ const ReviewSchema = new mongoose.Schema({
     comment: {
         type: String
     },
+    likes: {
+        type: Number
+    },
     createdAt: { type: Date, default: Date.now }
 });
 
