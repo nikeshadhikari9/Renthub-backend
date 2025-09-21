@@ -50,6 +50,7 @@ const addRoom = async (req, res) => {
             },
             contactNum: landlordContactNum,
             contactNum2: altContactNum,
+            tags,
             roomImages,
             isPromoted
         })

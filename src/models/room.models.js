@@ -27,6 +27,10 @@ const roomSchema = new mongoose.Schema(
             type: String,
             unique: true,
         },
+        tags: {
+            type: [String],
+            default: []
+        },
         landlordId: {
             type: mongoose.Schema.Types.ObjectId, ref: "User"
         },
